@@ -25,4 +25,20 @@ public class WeiYiDataService {
         logger.info("查询被调用");
         return mapper.selectAll();
     }
+
+    public WeiYiData selectById(int id){
+        return mapper.selectByPrimaryKey(id);
+    }
+
+    public int addData(WeiYiData data){
+        return mapper.insertSelective(data);
+    }
+
+    public int updData(WeiYiData data){
+        return mapper.updateByPrimaryKeySelective(data);
+    }
+
+    public int delData(int id){
+        return mapper.deleteByPrimaryKey(id);
+    }
 }

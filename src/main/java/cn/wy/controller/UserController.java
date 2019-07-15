@@ -27,9 +27,4 @@ public class UserController {
         return userService.findAll();
     }
 
-    @GetMapping(value = "/currentUser")
-    public String getCurrentUser(){
-        String user = (String) SecurityUtils.getSubject().getPrincipal();
-        return user;
-    }
 }

@@ -19,41 +19,162 @@
 <body>
 <div>
     <c:if test="${success ==true}">
-        <span>${msg}</span>
+        <span class="btn btn-default">${msg}${name}</span>
     </c:if>
-    <button onclick="currentUser()">查询当前用户</button>
+    <button class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-lg" onclick="add()">添加</button>
 </div>
 <table id="mytab" class="table table-hover"></table>
+
+
+<!-- 保存 -->
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modifly">用户注册</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon" >参数名：</span>
+                    <input type="text" class="form-control" placeholder="参数名" aria-describedby="sizing-addon1" id="name">
+                </div>
+                <br>
+                <div class="input-group input-group-lg">
+                    <span class="input-group-addon" >参数值：</span>
+                    <input type="text" class="form-control" placeholder="参数值" aria-describedby="sizing-addon1" id="value">
+                </div>
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="modifly()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
-    $('#mytab').bootstrapTable({
-        url: 'data',
-        queryParams: "queryParams",
-        toolbar: "#toolbar",
-        sidePagination: "true",
-        striped: true, // 是否显示行间隔色
-        //search : "true",
-        uniqueId: "ID",
-        pageSize: "5",
-        pagination: true, // 是否分页
-        sortable: true, // 是否启用排序
-        columns: [{
-            field: 'id',
-            title: '编号'
+    window.operateEvents = {
+        "click #TableEditor":function (e,value,row,index) {
+            upd(row.id);
         },
-            {
-                field: 'paramName',
-                title: '参数名'
+        "click #TableDelete":function (e,value,row,index) {
+            $.ajax({
+                url:"data/"+row.id,
+                dataType:"json",
+                type:"DELETE",
+                success:function (res) {
+                    if (res.success){
+                        alert(res.msg);
+                        location.reload(true);
+                    }
+                }
+            })
+        }
+    }
+
+    init(1)
+
+    function init(pageIndex){
+        $('#mytab').bootstrapTable({
+            url: 'data',
+            search : "true",
+            searchOnEnterKey:true,
+            pageNumber:pageIndex,
+            pageSize: "2",
+            showRefresh:true,
+            searchAlign:"left",
+            buttonsAlign:"left",
+            showToggle:"true",
+            queryParams: "queryParams",
+            toolbar: "#toolbar",
+            sidePagination: "true",
+            striped: true, // 是否显示行间隔色
+            uniqueId: "ID",
+
+            pagination: true, // 是否分页
+            sortable: true, // 是否启用排序
+            columns: [{
+                field: 'id',
+                title: '编号'
             },
-            {
-                field: 'paramValue',
-                title: '参数值'
-            },
+                {
+                    field: 'paramName',
+                    title: '参数名'
+                },
+                {
+                    field: 'paramValue',
+                    title: '参数值'
+                },
+                {
+                    field: 'Button',
+                    title: '操作',
+                    events: operateEvents,
+                    formatter: AddFunctionAlty
+                }
+            ]
+        });
+    }
+
+    function AddFunctionAlty(value,row,index) {
+        return [
+            '<button id = "TableEditor" type="button" class="btn btn-default" data-toggle="modal" data-target=".bs-example-modal-lg">修改</button> &nbsp;&nbsp;',
+            '<button id = "TableDelete" type="button" class="btn btn-default">删除</button>'
         ]
-    });
-    function currentUser() {
-        $.get("/user/currentUser",function (data) {
-            alert(data);
+    }
+
+    var obj = {id:null};
+
+    function add() {
+        $("#name").val("");
+        $("#value").val("");
+        obj = {id:null};
+    }
+
+    function upd(id) {
+        $.ajax({
+            url:"data/"+id,
+            dataType:"json",
+            type:"GET",
+            success:function (res) {
+               obj = res;
+               console.log(obj);
+                $("#name").val(obj.paramName);
+                $("#value").val(obj.paramValue);
+            }
         })
+    }
+
+    function modifly() {
+        obj.paramName = $("#name").val();
+        obj.paramValue = $("#value").val();
+        if (obj.id==null){
+            $.ajax({
+                url:"data",
+                dataType:"json",
+                data:obj,
+                type:"POST",
+                success:function (res) {
+                    if (res.success){
+                        alert(res.msg);
+                        location.reload(true);
+                    }
+                }
+            })
+        }else{
+            $.ajax({
+                url:"data",
+                dataType:"json",
+                data:obj,
+                type:"PUT",
+                success:function (res) {
+                    if (res.success){
+                        alert(res.msg);
+                        location.reload(true);
+                    }
+                }
+            })
+        }
     }
 </script>
 </body>

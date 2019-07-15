@@ -29,7 +29,9 @@ public class ViewController {
         Subject subject = SecurityUtils.getSubject();
         subject.login(token);
         ModelAndView modelAndView = new ModelAndView();
+        String name = (String) SecurityUtils.getSubject().getPrincipal();
         modelAndView.addObject("msg","欢迎登录");
+        modelAndView.addObject("name",name);
         modelAndView.addObject("success",true);
         modelAndView.setViewName("index");
         return modelAndView;
